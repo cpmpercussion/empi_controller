@@ -83,8 +83,8 @@ def command_servo(input=0.5):
 
 def read_lever():
     """Read a value from the lever and return as float."""
-    val = knob.value()
-    return interp(val, [0, 999], [0, 1])
+    input_val = knob.value
+    return interp(input_val, [0, 999], [0, 1])
 
 
 # Init devices:
