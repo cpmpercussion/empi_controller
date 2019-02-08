@@ -24,6 +24,8 @@ from pythonosc import udp_client
 
 POTENTIOMETER_PIN = 0
 SERVO_PIN = 5
+MIN_POT_CHANGE = 7
+MIN_SERVO_CHANGE = 5
 
 last_potentiometer_value = -100
 last_servo_value = -100
@@ -82,7 +84,7 @@ def command_servo(input=0.5):
     global last_servo_value
     val = interp(input, [0, 1], [0, 180])
     # Only write significant changes to servo.
-    if (abs(val - last_servo_value) > 2):
+    if (abs(val - last_servo_value) > MIN_SERVO_CHANGE):
         last_servo_value = val
         servo.setAngle(val)
 
@@ -91,7 +93,7 @@ def read_lever():
     """Read a value from the lever and return as float."""
     global last_potentiometer_value
     input_val = knob.value
-    if (abs(input_val - last_potentiometer_value) > 2):
+    if (abs(input_val - last_potentiometer_value) > MIN_POT_CHANGE):
         last_potentiometer_value = input_val
         return interp(input_val, [0, 999], [0, 1])
     else:
