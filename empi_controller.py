@@ -25,6 +25,8 @@ from pythonosc import udp_client
 POTENTIOMETER_PIN = 0
 SERVO_PIN = 5
 
+last_potentiometer_value = -100
+last_servo_value = -100
 
 def display_text(display, line1, line2=""):
     # Set up image and draw some text.
@@ -76,15 +78,25 @@ def process_angle_input(value):
 
 
 def command_servo(input=0.5):
-    """Send a command to the servo. Input is between 0, 1"""
+    """Send a command to the servo. Input is between 0, 1023"""
+    global last_servo_value
     val = interp(input, [0, 1], [0, 180])
-    servo.setAngle(val)
+    # Only write significant changes to servo.
+    if (abs(val - last_servo_value) > 2):
+        last_servo_value = val
+        servo.setAngle(val)
 
 
 def read_lever():
     """Read a value from the lever and return as float."""
+    global last_potentiometer_value
     input_val = knob.value
-    return interp(input_val, [0, 999], [0, 1])
+    if (abs(input_val - last_potentiometer_value) > 2):
+        last_potentiometer_value = input_val
+        return interp(input_val, [0, 999], [0, 1])
+    else:
+        return None
+
 
 
 # Init devices:
@@ -108,8 +120,11 @@ display_text(disp, "EMPI Booted", line2="Loading MDRNN.")
 
 def interaction_loop():
     input_value = read_lever()
-    command_servo(input_value)
-    display_text(disp, "Lever:", line2=str(input_value))
+    # Only react to real changes in the potentiometer.
+    if input_value is not None:
+        command_servo(input_value)
+        display_text(disp, "Lever:", line2=str(input_value))
+
 
 try:
     # user_thread.start()
