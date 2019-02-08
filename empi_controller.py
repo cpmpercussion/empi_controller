@@ -125,7 +125,8 @@ def interaction_loop():
     # Only react to real changes in the potentiometer.
     if input_value is not None:
         command_servo(input_value)
-        display_text(disp, "Lever:", line2=str(input_value))
+        lever_text = "Lever: {:10.4f}".format(input_value)
+        display_text(disp, lever_text, line2="RNN: ")
 
 
 try:
