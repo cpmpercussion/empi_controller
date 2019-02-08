@@ -24,7 +24,7 @@ from pythonosc import udp_client
 
 POTENTIOMETER_PIN = 0
 SERVO_PIN = 5
-MIN_POT_CHANGE = 7
+MIN_POT_CHANGE = 10
 MIN_SERVO_CHANGE = 5
 
 last_potentiometer_value = -100
