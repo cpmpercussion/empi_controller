@@ -9,3 +9,4 @@ cd Adafruit_Python_SSD1306
 sudo python setup.py install
 
 # pip3 install Adafruit-SSD1306
+pip3 install python-osc
