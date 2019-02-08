@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser(description='EMPI Controller')
 # OSC addresses
 parser.add_argument("--clientip", default="localhost", help="The address of output device.")
 parser.add_argument("--clientport", type=int, default=5001, help="The port the output device is listening on.")
-parser.add_argument("--serverip", default="localhost", help="The address of this server.")
+parser.add_argument("--serverip", default="127.0.0.1", help="The address of this server.")
 parser.add_argument("--serverport", type=int, default=5000, help="The port this server should listen on.")
 parser.add_argument("--synthip", default="localhost", help="The address of the synth.")
 parser.add_argument("--synthport", type=int, default=3000, help="The port the synth.")
