@@ -22,6 +22,20 @@ from pythonosc import dispatcher
 from pythonosc import osc_server
 from pythonosc import udp_client
 
+
+# Argparse
+parser = argparse.ArgumentParser(description='EMPI Controller')
+# OSC addresses
+parser.add_argument("--clientip", default="localhost", help="The address of output device.")
+parser.add_argument("--clientport", type=int, default=5001, help="The port the output device is listening on.")
+parser.add_argument("--serverip", default="localhost", help="The address of this server.")
+parser.add_argument("--serverport", type=int, default=5000, help="The port this server should listen on.")
+parser.add_argument("--synthip", default="localhost", help="The address of the synth.")
+parser.add_argument("--synthport", type=int, default=3000, help="The port the synth.")
+parser.add_argument('-d', '--direct', dest='direct_connect', action="store_true", help='Connect Servo to Input Directly.')
+args = parser.parse_args()
+
+
 POTENTIOMETER_PIN = 0
 SERVO_PIN = 5
 MIN_POT_CHANGE = 10
@@ -29,6 +43,8 @@ MIN_SERVO_CHANGE = 5
 
 last_potentiometer_value = -100
 last_servo_value = -100
+last_rnn_value = 0
+
 
 def display_text(display, line1, line2=""):
     # Set up image and draw some text.
@@ -120,20 +136,54 @@ display_text(disp, "EMPI Booted", line2="Loading MDRNN.")
 
 # Load some other stuff
 
+
+def send_sound_command(address, value):
+    """Send a sound command back to the interface/synth"""
+    osc_sound_client.send_message(address, value)
+
+
+def send_interface_command(value):
+    osc_prediction_client.send_message(INTERFACE_MESSAGE_ADDRESS, value)
+
+
+def handle_prediction_message(address: str, *osc_arguments) -> None:
+    """Handler for OSC messages from the interface"""
+    global last_rnn_value
+    int_input = osc_arguments[0]
+    send_sound_command(PREDICTION_MESSAGE_ADDRESS, int_input) # send to synth
+    command_servo(180 * input_value) # send to servo
+
+
+# OSC Interaction:
+INTERFACE_MESSAGE_ADDRESS = "/interface"
+PREDICTION_MESSAGE_ADDRESS = "/prediction"
+
+
+osc_prediction_client = udp_client.SimpleUDPClient(args.clientip, args.clientport)
+osc_sound_client = udp_client.SimpleUDPClient(args.synthip, args.synthport)
+
+dispatch = dispatcher.Dispatcher()
+dispatch.map(PREDICTION_MESSAGE_ADDRESS, handle_prediction_message)
+server = osc_server.ThreadingOSCUDPServer((args.serverip, args.serverport), dispatch)
+
+
 def interaction_loop():
     input_value = read_lever()
     # Only react to real changes in the potentiometer.
     if input_value is not None:
-        command_servo(input_value)
-        lever_text = "Lever: {:10.4f}".format(input_value)
-        display_text(disp, lever_text, line2="RNN: ")
-
+        send_interface_command(input_value)
+        send_sound_command(INTERFACE_MESSAGE_ADDRESS, input_value)
+        if args.direct_connect:
+            command_servo(input_value)
 
 try:
     # user_thread.start()
     # rnn_thread.start()
     while True:
         interaction_loop()
+        lever_text = "Lever: {:10.4f}".format(last_potentiometer_value)
+        rnn_text = "RNN: {:10.4f}".format(last_rnn_value)
+        display_text(disp, lever_text, line2=rnn_text)
         # if not args.nogui:
         #    root_window.update()
         # if args.callresponse:
