@@ -56,7 +56,7 @@ def display_text(display, line1, line2=""):
     image = Image.new('1', (width, height))
     draw = ImageDraw.Draw(image)
     draw.text((0, 0),  line1,  font=font, fill=255)
-    if line2 not None:
+    if line2 is not None:
         draw.text((0, 20), line2, font=font, fill=255)
     # Display image.
     display.image(image)
