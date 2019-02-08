@@ -8,6 +8,13 @@ from grove.adc import ADC
 import RPi.GPIO as IO
 from numpy import interp
 
+# SSD1306 OLED
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_SSD1306
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+
 class GroveRotaryAngleSensor(ADC):
     def __init__(self, channel):
         self.channel = channel
@@ -39,3 +46,26 @@ class GroveServo:
 
 servo = GroveServo
 knob = GroveRotaryAngleSensor
+
+# Display init
+# Raspberry Pi pin configuration:
+RST = 24
+# 128x32 display with hardware I2C:
+disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST)  # , i2c_address=0x3C)
+# font = ImageFont.truetype('Minecraftia.ttf', 8)
+font = ImageFont.load_default()
+# Initialize library.
+disp.begin()
+disp.clear()
+disp.display()
+
+# Set up image and draw some text.
+width = disp.width
+height = disp.height
+image = Image.new('1', (width, height))
+draw = ImageDraw.Draw(image)
+draw.text((0, 0),    'Hello',  font=font, fill=255)
+draw.text((0, 20), 'World!', font=font, fill=255)
+# Display image.
+disp.image(image)
+disp.display()
