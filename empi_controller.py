@@ -47,6 +47,7 @@ class GroveServo:
 servo = GroveServo
 knob = GroveRotaryAngleSensor
 
+
 def display_text(display, line1, line2=""):
     # Set up image and draw some text.
     display.clear()
@@ -54,8 +55,9 @@ def display_text(display, line1, line2=""):
     height = display.height
     image = Image.new('1', (width, height))
     draw = ImageDraw.Draw(image)
-    draw.text((0, 0),    'Hello',  font=font, fill=255)
-    draw.text((0, 20), 'World!', font=font, fill=255)
+    draw.text((0, 0),  line1,  font=font, fill=255)
+    if line2 not None:
+        draw.text((0, 20), line2, font=font, fill=255)
     # Display image.
     display.image(image)
     display.display()
